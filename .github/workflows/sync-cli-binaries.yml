@@ -56,26 +56,31 @@ jobs:
             plugins/nju-cli/bin/linux-x86_64/nju-cli \
             plugins/nju-cli/bin/macos-aarch64/nju-cli
 
-      - name: Update marketplace manifest version
+      - name: Update marketplace manifest versions
         run: |
           VERSION="${RELEASE_TAG#v}"
           python3 - <<PY
           import json
           from pathlib import Path
 
-          path = Path(".agents/plugins/marketplace.json")
-          data = json.loads(path.read_text())
-          for plugin in data.get("plugins", []):
+          marketplace_path = Path(".agents/plugins/marketplace.json")
+          marketplace = json.loads(marketplace_path.read_text())
+          for plugin in marketplace.get("plugins", []):
               if plugin.get("name") == "nju-cli":
                   plugin["version"] = "${VERSION}"
-          path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n")
+          marketplace_path.write_text(json.dumps(marketplace, indent=2, ensure_ascii=False) + "\n")
+
+          plugin_path = Path("plugins/nju-cli/.codex-plugin/plugin.json")
+          plugin_manifest = json.loads(plugin_path.read_text())
+          plugin_manifest["version"] = "${VERSION}"
+          plugin_path.write_text(json.dumps(plugin_manifest, indent=2, ensure_ascii=False) + "\n")
           PY
 
       - name: Commit packaged binaries and manifest
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add plugins/nju-cli/bin .agents/plugins/marketplace.json
+          git add plugins/nju-cli/bin .agents/plugins/marketplace.json plugins/nju-cli/.codex-plugin/plugin.json
           git diff --cached --quiet && exit 0
           git commit -m "Package nju-cli ${RELEASE_TAG}"
           git push
