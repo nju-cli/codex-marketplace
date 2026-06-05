@@ -4,7 +4,7 @@ This repository publishes the Codex marketplace entry for `nju-cli`.
 
 ## Structure
 
-- `marketplace.json`: Codex marketplace catalog.
+- `.agents/plugins/marketplace.json`: Codex marketplace catalog.
 - `plugins/nju-cli`: Codex plugin metadata and skills.
 - `plugins/nju-cli/bin`: Packaged `nju-cli` release binaries.
 - `plugins/nju-cli/scripts`: Cross-platform wrappers for invoking the packaged binary.
