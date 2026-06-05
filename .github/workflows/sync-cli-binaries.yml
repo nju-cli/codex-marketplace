@@ -1,0 +1,70 @@
+name: Sync CLI binaries
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: nju-cli release tag to package into this marketplace
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    name: Sync CLI binaries
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download release artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          rm -rf dist unpack
+          mkdir -p dist unpack
+          if [ -z "${RELEASE_TAG}" ]; then
+            RELEASE_TAG=$(gh release view --repo nju-cli/nju-cli --json tagName --jq .tagName)
+          fi
+          echo "RELEASE_TAG=${RELEASE_TAG}" >> "${GITHUB_ENV}"
+          gh release download "${RELEASE_TAG}" \
+            --repo nju-cli/nju-cli \
+            --dir dist \
+            --pattern 'nju-cli-linux-x86_64.tar.gz' \
+            --pattern 'nju-cli-macos-aarch64.tar.gz' \
+            --pattern 'nju-cli-macos-x86_64.tar.gz' \
+            --pattern 'nju-cli-windows-x86_64.zip'
+
+      - name: Unpack into plugin bin directory
+        run: |
+          rm -rf plugins/nju-cli/bin
+          mkdir -p \
+            plugins/nju-cli/bin/linux-x86_64 \
+            plugins/nju-cli/bin/macos-aarch64 \
+            plugins/nju-cli/bin/macos-x86_64 \
+            plugins/nju-cli/bin/windows-x86_64
+
+          tar -C plugins/nju-cli/bin/linux-x86_64 -xzf dist/nju-cli-linux-x86_64.tar.gz
+          tar -C plugins/nju-cli/bin/macos-aarch64 -xzf dist/nju-cli-macos-aarch64.tar.gz
+          tar -C plugins/nju-cli/bin/macos-x86_64 -xzf dist/nju-cli-macos-x86_64.tar.gz
+          unzip -q dist/nju-cli-windows-x86_64.zip -d unpack/windows
+
+          cp unpack/windows/nju-cli.exe plugins/nju-cli/bin/windows-x86_64/nju-cli.exe
+          chmod +x \
+            plugins/nju-cli/bin/linux-x86_64/nju-cli \
+            plugins/nju-cli/bin/macos-aarch64/nju-cli \
+            plugins/nju-cli/bin/macos-x86_64/nju-cli
+
+      - name: Commit packaged binaries
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add plugins/nju-cli/bin
+          git diff --cached --quiet && exit 0
+          git commit -m "Package nju-cli ${RELEASE_TAG}"
+          git push
