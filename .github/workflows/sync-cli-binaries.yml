@@ -40,11 +40,11 @@ jobs:
             --pattern 'nju-cli-windows-x86_64.zip'
 
       - name: Download source skills
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p unpack/source
-          gh api "repos/nju-cli/nju-cli/tarball/${RELEASE_TAG}" --output dist/nju-cli-source.tar.gz
+          curl -fsSL \
+            -o dist/nju-cli-source.tar.gz \
+            "https://codeload.github.com/nju-cli/nju-cli/tar.gz/refs/tags/${RELEASE_TAG}"
           tar -C unpack/source --strip-components=1 -xzf dist/nju-cli-source.tar.gz
           test -d unpack/source/nju-cli-skills
 
