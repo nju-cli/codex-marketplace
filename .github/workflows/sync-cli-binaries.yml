@@ -37,7 +37,6 @@ jobs:
             --dir dist \
             --pattern 'nju-cli-linux-x86_64.tar.gz' \
             --pattern 'nju-cli-macos-aarch64.tar.gz' \
-            --pattern 'nju-cli-macos-x86_64.tar.gz' \
             --pattern 'nju-cli-windows-x86_64.zip'
 
       - name: Unpack into plugin bin directory
@@ -46,19 +45,16 @@ jobs:
           mkdir -p \
             plugins/nju-cli/bin/linux-x86_64 \
             plugins/nju-cli/bin/macos-aarch64 \
-            plugins/nju-cli/bin/macos-x86_64 \
             plugins/nju-cli/bin/windows-x86_64
 
           tar -C plugins/nju-cli/bin/linux-x86_64 -xzf dist/nju-cli-linux-x86_64.tar.gz
           tar -C plugins/nju-cli/bin/macos-aarch64 -xzf dist/nju-cli-macos-aarch64.tar.gz
-          tar -C plugins/nju-cli/bin/macos-x86_64 -xzf dist/nju-cli-macos-x86_64.tar.gz
           unzip -q dist/nju-cli-windows-x86_64.zip -d unpack/windows
 
           cp unpack/windows/nju-cli.exe plugins/nju-cli/bin/windows-x86_64/nju-cli.exe
           chmod +x \
             plugins/nju-cli/bin/linux-x86_64/nju-cli \
-            plugins/nju-cli/bin/macos-aarch64/nju-cli \
-            plugins/nju-cli/bin/macos-x86_64/nju-cli
+            plugins/nju-cli/bin/macos-aarch64/nju-cli
 
       - name: Commit packaged binaries
         run: |

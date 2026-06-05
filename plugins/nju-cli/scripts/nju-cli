@@ -14,9 +14,6 @@ case "${os}:${arch}" in
   Darwin:arm64|Darwin:aarch64)
     bin="${plugin_dir}/bin/macos-aarch64/nju-cli"
     ;;
-  Darwin:x86_64|Darwin:amd64)
-    bin="${plugin_dir}/bin/macos-x86_64/nju-cli"
-    ;;
   *)
     echo "unsupported platform: ${os}/${arch}" >&2
     exit 1
