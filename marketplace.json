@@ -1,0 +1,20 @@
+{
+  "name": "nju-cli",
+  "interface": {
+    "displayName": "NJU CLI"
+  },
+  "plugins": [
+    {
+      "name": "nju-cli",
+      "source": {
+        "source": "local",
+        "path": "./plugins/nju-cli"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Education"
+    }
+  ]
+}

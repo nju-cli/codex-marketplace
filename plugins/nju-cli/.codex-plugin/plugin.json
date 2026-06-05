@@ -1,0 +1,36 @@
+{
+  "name": "nju-cli",
+  "version": "0.1.0",
+  "description": "Codex skills and CLI guidance for interacting with Nanjing University services.",
+  "author": {
+    "name": "nju-cli",
+    "url": "https://github.com/nju-cli"
+  },
+  "homepage": "https://github.com/nju-cli/nju-cli",
+  "repository": "https://github.com/nju-cli/codex-marketplace",
+  "license": "GPL-3.0-only",
+  "keywords": [
+    "nju",
+    "cli",
+    "skills",
+    "education"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "NJU CLI",
+    "shortDescription": "Use Codex skills for Nanjing University workflows.",
+    "longDescription": "NJU CLI provides Codex skills for querying and using Nanjing University services, with the nju-cli binary released from GitHub Actions.",
+    "developerName": "nju-cli",
+    "category": "Education",
+    "capabilities": [
+      "Skills"
+    ],
+    "websiteURL": "https://github.com/nju-cli/nju-cli",
+    "defaultPrompt": [
+      "帮我查询南京大学教务相关信息。",
+      "用 nju-cli skills 解释这个南京大学通知。",
+      "帮我规划一次 nju-cli 查询。"
+    ],
+    "brandColor": "#8A1538"
+  }
+}
