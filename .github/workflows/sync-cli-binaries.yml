@@ -39,6 +39,15 @@ jobs:
             --pattern 'nju-cli-macos-aarch64.tar.gz' \
             --pattern 'nju-cli-windows-x86_64.zip'
 
+      - name: Download source skills
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p unpack/source
+          gh api "repos/nju-cli/nju-cli/tarball/${RELEASE_TAG}" --output dist/nju-cli-source.tar.gz
+          tar -C unpack/source --strip-components=1 -xzf dist/nju-cli-source.tar.gz
+          test -d unpack/source/nju-cli-skills
+
       - name: Unpack into plugin bin directory
         run: |
           rm -rf plugins/nju-cli/bin
@@ -55,6 +64,12 @@ jobs:
           chmod +x \
             plugins/nju-cli/bin/linux-x86_64/nju-cli \
             plugins/nju-cli/bin/macos-aarch64/nju-cli
+
+      - name: Update skill contents
+        run: |
+          rm -rf plugins/nju-cli/skills/nju-cli
+          mkdir -p plugins/nju-cli/skills
+          cp -R unpack/source/nju-cli-skills plugins/nju-cli/skills/nju-cli
 
       - name: Update marketplace manifest versions
         run: |
@@ -76,11 +91,11 @@ jobs:
           plugin_path.write_text(json.dumps(plugin_manifest, indent=2, ensure_ascii=False) + "\n")
           PY
 
-      - name: Commit packaged binaries and manifest
+      - name: Commit packaged binaries, skills, and manifest
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add plugins/nju-cli/bin .agents/plugins/marketplace.json plugins/nju-cli/.codex-plugin/plugin.json
+          git add plugins/nju-cli/bin plugins/nju-cli/skills/nju-cli .agents/plugins/marketplace.json plugins/nju-cli/.codex-plugin/plugin.json
           git diff --cached --quiet && exit 0
           git commit -m "Package nju-cli ${RELEASE_TAG}"
           git push
