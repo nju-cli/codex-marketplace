@@ -11,6 +11,9 @@ case "${os}:${arch}" in
   Linux:x86_64|Linux:amd64)
     bin="${plugin_dir}/bin/linux-x86_64/nju-cli"
     ;;
+  Linux:aarch64|Linux:arm64)
+    bin="${plugin_dir}/bin/linux-aarch64/nju-cli"
+    ;;
   Darwin:arm64|Darwin:aarch64)
     bin="${plugin_dir}/bin/macos-aarch64/nju-cli"
     ;;
