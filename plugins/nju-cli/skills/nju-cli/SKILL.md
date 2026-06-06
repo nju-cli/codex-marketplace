@@ -20,8 +20,9 @@ description: 南京大学相关操作，比如教务通知，交换生，排名�
 
 这里的文件路径是相对skill目录（也就是此SKILL.md所在目录）来的
 
-| 网站                                             | skill                           |
-| ------------------------------------------------ | ------------------------------- |
-| 教务网：各种官方通知，比如毕业要求，四六级考试等 | subcommands/academic-affairs.md |
-| ehall网上办事大厅：包含课表、培养方案等          | subcommands/ehall.md            |
-| 交换生管理                                       | subcommands/exchange-system.md  |
+| 网站                                              | skill                           |
+| ------------------------------------------------- | ------------------------------- |
+| 教务网：各种官方通知，比如毕业要求，四六级考试等  | subcommands/academic-affairs.md |
+| ehall网上办事大厅：包含课表、培养方案、成绩查询等 | subcommands/ehall.md            |
+| 交换生管理                                        | subcommands/exchange-system.md  |
+| 南大团委：最新动态、公告通知                      | subcommands/youth-league.md     |
