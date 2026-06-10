@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -eu
 
-release_tag="v1.3.8"
+release_tag="v1.4.2"
 repo="nju-cli/nju-cli"
 script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 plugin_dir=$(CDPATH= cd -- "${script_dir}/.." && pwd)
