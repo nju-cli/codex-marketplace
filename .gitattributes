@@ -1,1 +1,0 @@
-plugins/nju-cli/bin/** filter=lfs diff=lfs merge=lfs -text
