@@ -3,9 +3,52 @@ set -eu
 
 release_tag="v1.3.8"
 repo="nju-cli/nju-cli"
+nju_mirror_url="https://mirror.nju.edu.cn/github-release/${repo}"
+download_mirror=""
+download_mirror_set=0
 script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 plugin_dir=$(CDPATH= cd -- "${script_dir}/.." && pwd)
 checksum_file="${script_dir}/nju-cli.sha256"
+
+print_download_mirrors() {
+  echo "available download mirrors:" >&2
+  echo "  nju  ${nju_mirror_url}/" >&2
+}
+
+arg_count=$#
+while [ "${arg_count}" -gt 0 ]; do
+  arg=$1
+  shift
+  arg_count=$((arg_count - 1))
+  case "${arg}" in
+    --download-mirror=*)
+      download_mirror=${arg#--download-mirror=}
+      download_mirror_set=1
+      ;;
+    --download-mirror)
+      echo "--download-mirror requires the --download-mirror=VALUE form" >&2
+      exit 1
+      ;;
+    *)
+      set -- "$@" "${arg}"
+      ;;
+  esac
+done
+
+if [ "${download_mirror_set}" -eq 1 ] && [ "${download_mirror}" = "" ]; then
+  echo "--download-mirror requires a non-empty value" >&2
+  exit 1
+fi
+
+if [ "${download_mirror_set}" -eq 0 ]; then
+  :
+elif [ "${download_mirror}" = "nju" ]; then
+  download_mirror="${nju_mirror_url}"
+else
+  echo "unsupported download mirror: ${download_mirror}" >&2
+  print_download_mirrors
+  exit 1
+fi
 
 os=$(uname -s)
 arch=$(uname -m)
@@ -57,7 +100,11 @@ expected_sha() {
 }
 
 download() {
-  url="https://github.com/${repo}/releases/download/${release_tag}/${asset}"
+  if [ "${download_mirror}" = "" ]; then
+    url="https://github.com/${repo}/releases/download/${release_tag}/${asset}"
+  else
+    url="${download_mirror}/${release_tag}/${asset}"
+  fi
   out="$1"
 
   if command -v curl >/dev/null 2>&1; then

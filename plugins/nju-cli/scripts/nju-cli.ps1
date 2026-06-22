@@ -2,11 +2,45 @@ $ErrorActionPreference = "Stop"
 
 $ReleaseTag = "v1.3.8"
 $Repo = "nju-cli/nju-cli"
+$NjuMirrorUrl = "https://mirror.nju.edu.cn/github-release/$Repo"
+$DownloadMirror = $null
 $PluginDir = Resolve-Path (Join-Path $PSScriptRoot "..")
 $Bin = Join-Path $PluginDir "bin/windows-x86_64/nju-cli.exe"
 $ChecksumFile = Join-Path $PSScriptRoot "nju-cli.sha256"
 $Target = "windows-x86_64"
 $Asset = "nju-cli-windows-x86_64.zip"
+
+$ForwardArgs = @()
+foreach ($Arg in $args) {
+  if ($Arg -like "--download-mirror=*") {
+    $DownloadMirror = $Arg.Substring("--download-mirror=".Length)
+    if ([string]::IsNullOrWhiteSpace($DownloadMirror)) {
+      Write-Error "--download-mirror requires a non-empty value"
+    }
+  } elseif ($Arg -eq "--download-mirror") {
+    Write-Error "--download-mirror requires the --download-mirror=VALUE form"
+  } else {
+    $ForwardArgs += $Arg
+  }
+}
+
+function Write-DownloadMirrorList {
+  Write-Error "unsupported download mirror: $DownloadMirror`navailable download mirrors:`n  nju  $NjuMirrorUrl/"
+}
+
+function Get-ReleaseAssetUrl {
+  if ([string]::IsNullOrWhiteSpace($DownloadMirror)) {
+    return "https://github.com/$Repo/releases/download/$ReleaseTag/$Asset"
+  }
+
+  if ($DownloadMirror -eq "nju") {
+    $Base = $NjuMirrorUrl
+  } else {
+    Write-DownloadMirrorList
+  }
+
+  return "$Base/$ReleaseTag/$Asset"
+}
 
 function Test-LfsPointer($Path) {
   if (!(Test-Path $Path)) {
@@ -38,7 +72,7 @@ function Get-ExpectedSha($Path, $TargetName) {
 }
 
 function Save-ReleaseAsset($Destination) {
-  $Url = "https://github.com/$Repo/releases/download/$ReleaseTag/$Asset"
+  $Url = Get-ReleaseAssetUrl
   Invoke-WebRequest -Uri $Url -OutFile $Destination
 }
 
@@ -78,5 +112,5 @@ if ($ExpectedSha) {
   }
 }
 
-& $Bin @args
+& $Bin @ForwardArgs
 exit $LASTEXITCODE
