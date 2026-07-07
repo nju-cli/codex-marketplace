@@ -81,28 +81,43 @@ jobs:
 
       - name: Update marketplace manifest versions
         run: |
-          VERSION="${RELEASE_TAG#v}"
-          python3 - <<PY
+          export VERSION="${RELEASE_TAG#v}"
+          python3 - <<'PY'
           import json
+          import os
           import re
           from pathlib import Path
+
+          release_tag = os.environ["RELEASE_TAG"]
+          version = os.environ["VERSION"]
 
           marketplace_path = Path(".agents/plugins/marketplace.json")
           marketplace = json.loads(marketplace_path.read_text())
           for plugin in marketplace.get("plugins", []):
               if plugin.get("name") == "nju-cli":
-                  plugin["version"] = "${VERSION}"
+                  plugin["version"] = version
           marketplace_path.write_text(json.dumps(marketplace, indent=2, ensure_ascii=False) + "\n")
 
           plugin_path = Path("plugins/nju-cli/.codex-plugin/plugin.json")
           plugin_manifest = json.loads(plugin_path.read_text())
-          plugin_manifest["version"] = "${VERSION}"
+          plugin_manifest["version"] = version
           plugin_path.write_text(json.dumps(plugin_manifest, indent=2, ensure_ascii=False) + "\n")
 
-          for script_path in [Path("plugins/nju-cli/scripts/nju-cli"), Path("plugins/nju-cli/scripts/nju-cli.ps1")]:
+          replacements = {
+              Path("plugins/nju-cli/scripts/nju-cli"): (
+                  r'release_tag="[^"]+"',
+                  f'release_tag="{release_tag}"',
+              ),
+              Path("plugins/nju-cli/scripts/nju-cli.ps1"): (
+                  r'\$ReleaseTag = "[^"]+"',
+                  f'$ReleaseTag = "{release_tag}"',
+              ),
+          }
+          for script_path, (pattern, replacement) in replacements.items():
               text = script_path.read_text()
-              text = re.sub(r'release_tag="v[^"]+"', 'release_tag="${RELEASE_TAG}"', text)
-              text = re.sub(r'\$ReleaseTag = "v[^"]+"', '$ReleaseTag = "${RELEASE_TAG}"', text)
+              text, count = re.subn(pattern, replacement, text)
+              if count != 1:
+                  raise RuntimeError(f"expected exactly one release tag assignment in {script_path}, found {count}")
               script_path.write_text(text)
           PY
 
